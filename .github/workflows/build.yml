@@ -1,0 +1,41 @@
+name: Build Snake APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Get source code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            python3-pip \
+            python3-setuptools \
+            git zip unzip \
+            openjdk-17-jdk \
+            autoconf libtool pkg-config \
+            zlib1g-dev libncurses5-dev \
+            libncursesw5-dev libtinfo6 \
+            cmake libffi-dev libssl-dev
+
+      - name: Install Buildozer
+        run: |
+          pip3 install --user --upgrade buildozer cython==0.29.36
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Build APK
+        run: buildozer android debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Snake-Game-APK
+          path: bin/*.apk
